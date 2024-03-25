@@ -1,4 +1,3 @@
-# bb
-### *black-box*
+# *dash*
 
-A W.I.P. data collection and LED management project using bare-metal STM32 programming.
+A W.I.P. multi-function speedometer  and LED management project using bare-metal STM32 programming.
