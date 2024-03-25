@@ -1,3 +1,18 @@
-default:
-	arm-none-eabi-objcopy -O binary firmware.elf firmware.bin
-	st-flash write firmware.bin 0x8000000
+CFLAGS ?= #-W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -fno-common -Wconversion -g3 -Os -ffunction-sections -fdata-sections -I. -mcpu=cortex-m0 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
+LDFLAGS ?= #-Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+SOURCES = startup.c main.c
+
+
+build: firmware.elf
+
+clean:
+	rm -rf firmware.*
+
+firmware.elf: $(SOURCES)
+	arm-none-eabi-gcc $< -T linker_script.ld -o $@ $(CFLAGS) $(LDFLAGS)
+	
+firmware.bin: firmware.elf
+	arm-none-eabi-objcopy -O binary $< $@
+
+flash: firmware.bin
+	st-flash --reset write $< 0x8000000
