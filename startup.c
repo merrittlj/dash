@@ -1,4 +1,4 @@
-int main(void);
+#include "main.c"
 
 /* Reset handler/startup code. */
 __attribute__((naked, noreturn))
