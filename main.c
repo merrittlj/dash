@@ -1,5 +1,14 @@
+/*
+ * filename:	main.c
+ * date:	03.29.24
+ * author:	Lucas Merritt/merrittlj
+ * description:	Program core.
+ */
+
 #include <stdint.h>
 
+
+typedef void (*func_ptr)(void);
 
 struct gpio {
 	volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
@@ -7,6 +16,7 @@ struct gpio {
 
 /* GPIOA is 0x48000000, all subsequent banks are 0x400(1kb) apart. */
 #define GPIO(bank) ((struct gpio *) (0x48000000 + (0x400 * (bank))))
+#define BANK(letter) ((uint8_t)((letter) - 'A'))
 
 #define BIT(x) (1UL << (x))
 
@@ -25,6 +35,19 @@ struct rcc {
 #define RCC ((struct rcc *) 0x40021000)
 
 enum {RCC_PORT_DISABLE, RCC_PORT_ENABLE};
+
+enum {LED_COLOR_RED = 6, LED_COLOR_BLUE, LED_COLOR_ORANGE, LED_COLOR_GREEN};
+
+struct state {
+	func_ptr action;  /* What action to take when transitioning in. */
+	func_ptr transition;  /* What action to take when transitioning out. */
+	uint8_t next;  /* Next state. */
+
+	char _padding[3];
+};
+
+/* The FSM array does not directly depend on what indexes the states are at. */
+enum {STATE_MAX_SPEED, STATE_TRIP_DISTANCE, STATE_TOTAL_DISTANCE, NUM_STATES};
 
 
 static inline void gpio_set_mode(uint16_t pin, uint8_t mode)
@@ -47,9 +70,9 @@ static inline uint8_t gpio_read_input(uint16_t pin)
 	return (GPIO(PIN_BANK(pin))->IDR >> PIN_NUM(pin)) & 1;
 }
 
-static inline void rcc_port_enable(uint8_t port, uint8_t mode)
+static inline void rcc_port_enable(uint8_t bank, uint8_t mode)
 {
-	int n = (17 + port);
+	int n = (17 + bank);
 	RCC->AHBENR = (RCC->AHBENR & ~BIT(n)) | (mode << n);
 }
 
@@ -58,27 +81,82 @@ void spin(volatile uint32_t x)
 	while (x--) (void) 0;
 }
 
+static inline void write_builtin_led(uint8_t color, uint8_t mode)
+{
+	rcc_port_enable(BANK('C'), RCC_PORT_ENABLE);
+	gpio_set_mode(PIN('C', color), GPIO_MODE_OUTPUT);
+	gpio_write_output(PIN('C', color), mode);
+}
+
+void max_speed_action()
+{
+	write_builtin_led(LED_COLOR_RED, GPIO_OUTPUT_SET);
+}
+
+void max_speed_transition()
+{
+	write_builtin_led(LED_COLOR_RED, GPIO_OUTPUT_CLEAR);
+}
+
+void trip_distance_action()
+{
+	write_builtin_led(LED_COLOR_GREEN, GPIO_OUTPUT_SET);
+}
+
+void trip_distance_transition()
+{
+	write_builtin_led(LED_COLOR_GREEN, GPIO_OUTPUT_CLEAR);
+}
+
+void total_distance_action()
+{
+	write_builtin_led(LED_COLOR_BLUE, GPIO_OUTPUT_SET);
+}
+
+void total_distance_transition()
+{
+	write_builtin_led(LED_COLOR_BLUE, GPIO_OUTPUT_CLEAR);
+}
+
 int main()
 {
-	uint16_t led = PIN('C', 6);
+	const struct state FSM[NUM_STATES] = {
+		[STATE_MAX_SPEED] = {
+			max_speed_action,
+			max_speed_transition,
+			.next = STATE_TRIP_DISTANCE
+		},
+
+		[STATE_TRIP_DISTANCE] = {
+			trip_distance_action,
+			trip_distance_transition,
+			.next = STATE_TOTAL_DISTANCE
+		},
+
+		[STATE_TOTAL_DISTANCE] = {
+			total_distance_action,
+			total_distance_transition,
+			.next = STATE_MAX_SPEED
+		}
+	};
+
+	struct state current_state = FSM[STATE_MAX_SPEED];
+
 	uint16_t usrbtn = PIN('A', 0);
 
-	rcc_port_enable(PIN_BANK(led), RCC_PORT_ENABLE);
 	rcc_port_enable(PIN_BANK(usrbtn), RCC_PORT_ENABLE);
-	gpio_set_mode(led, GPIO_MODE_OUTPUT);
 	gpio_set_mode(usrbtn, GPIO_MODE_INPUT);
-
+	
+	current_state.action();
 	for (;;) {
-		while (gpio_read_input(usrbtn)) {
-			gpio_write_output(led, GPIO_OUTPUT_SET);
-			spin(999999);
-			gpio_write_output(led, GPIO_OUTPUT_CLEAR);
-			spin(999999);
-			if (!gpio_read_input(usrbtn)) {
-				led++;
-				if (PIN_NUM(led) > 9) led = ((PIN_BANK(led) << 8) | 6);
-				gpio_set_mode(led, GPIO_MODE_OUTPUT);
-			}
+		if (gpio_read_input(usrbtn)) {
+			current_state.transition();
+			current_state = FSM[current_state.next];
+			current_state.action();
+
+			/* Wait until button is not pressed. */
+			while (gpio_read_input(usrbtn)) (void) 0;
+			spin(59999);  /* Handle button debounce. */
 		}
 	}
 

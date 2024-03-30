@@ -1,3 +1,10 @@
+/*
+ * filename:	startup.c
+ * date:	03.29.24
+ * author:	Lucas Merritt/merrittlj
+ * description:	Startup code, prepares memory and MCU.
+ */
+
 #include "main.c"
 
 /* Reset handler/startup code. */

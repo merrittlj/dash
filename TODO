@@ -1,0 +1,4 @@
+* Utilize interrupts
+* Separate hardware and software(state) functions
+* Logging/debugging
+* Get basic data on segmented display
