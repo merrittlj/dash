@@ -1,46 +1,47 @@
-# Resulting file
-TARGET	:= firmware.bin
-# Project paths
-LIB	:= ./lib
-INC	:= ./inc
-ARC	:= ./arc
-OBJ	:= ./obj
+MAKE_DIR = $(PWD)
+SRC_DIR	 = $(MAKE_DIR)/src
+
+ROOT_DIR := $(SRC_DIR)/root
+HAL_DIR  := $(SRC_DIR)/hal
+
+INC_SRCH_PATH :=
+INC_SRCH_PATH += -I$(ROOT_DIR)
+INC_SRCH_PATH += -I$(HAL_DIR)
+
+LIB_SRCH_PATH := 
+LIB_SRCH_PATH += -L$(MAKE_DIR)/libs
+
+LIBS := -lhal -lc -lgcc
 
 # Toolchain
-CC	:= arm-none-eabi-gcc 
-LD 	:= arm-none-eabi-gcc
-CPY 	:= arm-none-eabi-objcopy 
-# Linker script
-LSCRIPT	:= linker_script.ld
+CC  := arm-none-eabi-gcc
+LD  := arm-none-eabi-gcc
+CPY := arm-none-eabi-objcopy
 
 # Device-specific flags 
-DFLAGS	?= -mcpu=cortex-m0 -mthumb -mfloat-abi=softfp -mfpu=auto
+DFLAGS := -mcpu=cortex-m0 -mthumb -mfloat-abi=softfp -mfpu=auto
 # Compiler flags
-CFLAGS	?= -g3 -Os -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -Wpadded -Wconversion  -ffunction-sections -fdata-sections -fno-common -fno-short-enums -I. $(DFLAGS) $(EXTRA_CFLAGS)
-# Linker flags
-LDFLAGS	?= -T $(LSCRIPT) -nostartfiles -nostdlib --specs nano.specs -l c -l gcc -Wl,--gc-sections -Wl,-Map=$@.map
-# Object copy flags
-OFLAGS	?= -O binary 
+CFLAGS := -g3 -Os -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -Wpadded -Wconversion  -ffunction-sections -fdata-sections -fno-common  # -fno-short-enums # newlib doesn't work well with this
+CFLAGS += $(DFLAGS)
+CFLAGS += $(EXTRA_CFLAGS)
+CFLAGS += $(INC_SRCH_PATH) $(LIB_SRCH_PATH)
 
-# Sources
-SOURCES	:= $(shell find $(LIB) -type f -name *.c)
-OBJECTS	:= $(patsubst $(LIB)/%.c, $(OBJ)/%.o, $(SOURCES))
-
-.DEFAULT_GOAL := all
+export MAKE_DIR LIBS CC LD CPY CFLAGS
 
 
-all: build program
+.DEFAULT_GOAL = all
 
-build: $(OBJ)/$(TARGET)
+all: build flash
+
+build:
+	@$(MAKE) -C $(HAL_DIR) -f hal.mk
+	@$(MAKE) -C $(ROOT_DIR) -f root.mk
 
 clean:
-	rm -rf $(OBJ)/*
+	@$(MAKE) -C $(HAL_DIR) -f hal.mk clean
+	@$(MAKE) -C $(ROOT_DIR) -f root.mk clean
 
-$(OBJ)/firmware.elf: $(SOURCES)
-	$(CC) $< -o $@ $(CFLAGS) $(LDFLAGS)
-	
-$(OBJ)/$(TARGET): $(OBJ)/firmware.elf
-	$(CPY) $< $@
+flash:
+	@st-flash --reset write $(MAKE_DIR)/prog/firmware.bin 0x8000000
 
-program: $(OBJ)/$(TARGET)
-	st-flash --reset write $< 0x8000000
+.PHONY: all build clean flash 

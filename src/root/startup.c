@@ -5,7 +5,7 @@
  * description:	Startup code, prepares memory and MCU.
  */
 
-#include "main.c"
+#include "main.h"
 
 /* Reset handler/startup code. */
 __attribute__((naked, noreturn))

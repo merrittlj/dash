@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include "main.h"  /* ONLY for main function, so startup.c doesn't include main.c */
+
 
 typedef void (*func_ptr)(void);
 
