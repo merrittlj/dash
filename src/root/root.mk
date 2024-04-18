@@ -1,4 +1,4 @@
-PROG = $(MAKE_DIR)/prog/firmware.bin
+TARGET = $(MAKE_DIR)/bin/firmware.bin
 SRCS = $(wildcard *.c)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 
@@ -9,17 +9,17 @@ LDFLAGS ?= -T $(LSCRIPT) -nostartfiles -nostdlib --specs nano.specs -Wl,--gc-sec
 OFLAGS  ?= -O binary
 
 
-$(PROG): $(SRCS)
-	@mkdir -p $(MAKE_DIR)/prog
+$(TARGET): $(SRCS)
+	@mkdir -p $(MAKE_DIR)/bin
 	@$(LD) $^ $(CFLAGS) $(LDFLAGS) $(LIBS) -o intermediate.elf
 	@$(CPY) $(OFLAGS) intermediate.elf $@
-	@echo "Generate program $(notdir $(PROG)) from $^"
+	@echo "Generate program $(notdir $(TARGET)) from $^"
 
 clean:
-	@$(RM) -f $(OBJS) $(PROG)
+	@$(RM) -f $(OBJS) $(TARGET)
 	@$(RM) -f *.expand
-	@$(RM) -rf ../prog ../libs
+	@$(RM) -rf $(MAKE_DIR)/bin $(MAKE_DIR)/libs
 	@echo "Remove objects: $(OBJS)"
-	@echo "Remove libraries: $(notdir $(PROG))"
+	@echo "Remove libraries: $(notdir $(TARGET))"
 
 .PHONY: clean

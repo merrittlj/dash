@@ -1,4 +1,4 @@
-LIB = $(MAKE_DIR)/libs/libhal.a
+LIB = $(MAKE_DIR)/libs/libstate.a
 SRCS = $(wildcard *.c)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 
