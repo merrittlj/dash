@@ -6,6 +6,7 @@
  */
 
 #include "main.h"
+#include "hal.h"
 
 /* Reset handler/startup code. */
 __attribute__((naked, noreturn))
@@ -27,5 +28,7 @@ extern void _estack(void);  /* Defined in linker_script.ld */
 __attribute__((section(".isr_vector")))  /* Attribute places array in vector table. */
 void (*const table[16 + 32])(void) = {
 	_estack,  /* Initial stack address */
-	_reset_handler  /* Boot function */
+	_reset_handler,  /* Boot function */
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	_stk_handler
 };

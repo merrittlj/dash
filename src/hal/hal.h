@@ -43,4 +43,16 @@ extern void gpio_write_output(uint16_t pin, uint8_t mode);
 extern uint8_t gpio_read_input(uint16_t pin);
 extern void rcc_port_enable(uint8_t bank, uint8_t mode);
 
+/* SysTick */
+struct stk {
+	volatile uint32_t CSR, RVR, CVR, CALIB;
+};
+
+#define STK ((struct stk *) 0xE000E010)
+extern volatile uint32_t s_ticks;
+
+extern void stk_init(uint32_t reload);
+extern void _stk_handler();
+extern int timer_expired(uint32_t *t, uint32_t prd, uint32_t now);
+
 #endif
