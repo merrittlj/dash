@@ -1,8 +1,5 @@
-* Fix timer
-* FSM off/idle state
-* Further modularize build/files
-	- Explicit dependencies: module makefiles should directly -I other modules instead of relying on top makefile
 * Utilize interrupts
-* Separate hardware and software(state) functions
-* Logging/debugging
+	- Fix/debug button code
 * Get basic data on segmented display
+** Further modularize build/files
+*** Logging?

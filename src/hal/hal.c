@@ -8,9 +8,12 @@
 #include <stdint.h>
 
 #include "hal.h"
+#include "common.h"
 
 
 volatile uint32_t s_ticks = 0;
+
+func_ptr line_funcs[32];
 
 void gpio_set_mode(uint16_t pin, uint8_t mode)
 {
@@ -58,4 +61,59 @@ int timer_expired(uint32_t *t, uint32_t prd, uint32_t now)
 	if (*t > now) return 0;
 	*t = (now - *t) > prd ? now + prd : *t + prd;  /* Adjust the timer to correct for lateness, or adjust the timer to the next period. This code is genius beyond my understanding. */
 	return 1;
+}
+
+/*
+From datasheet:
+
+ Configure the corresponding mask bit in the EXTI_IMR register.
+
+ Configure the trigger selection bits of the interrupt line (EXTI_RTSR and EXTI_FTSR)
+
+ Configure the enable and mask bits that control the NVIC IRQ channel mapped to the EXTI so that an interrupt coming from one of the EXTI line can be correctly acknowledged.
+*/
+void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr handler)
+{
+	/* TODO: disable/clear bits */
+	RCC->APB2ENR |= BIT(0);
+	uint8_t n = PIN_NUM(pin);
+
+	EXTI->IMR |= BIT(n);  /* Unmask line. */
+	volatile uint32_t edge_selection = (EXTI->FTSR - (0x04 * rising));  /* Rising/falling edge. */
+	edge_selection |= BIT(n);
+
+	SYSCFG->EXTICR[n / 4] |= PIN_BANK(pin) << ((n - (4 * (n / 4))) * 4);  /* Set source input for respective EXTI line. */
+	
+	uint8_t int_pos = n < 2 ? 12 : n < 4 ? 13 : 14;
+	NVIC->ISER |= BIT(int_pos);  /* Enable line interrupts for EXTI section(1:0, 3:2, 15:4). */
+	NVIC->IPR[int_pos / 4] |= priority << (int_pos % 4);
+	
+	line_funcs[n] = handler;
+}
+
+void exti_simple_init(func_ptr handler)
+{
+	RCC->APB2ENR |= BIT(0);
+
+	EXTI->IMR |= BIT(0);
+	EXTI->RTSR |= BIT(0);
+	SYSCFG->EXTICR[0] |= 0;
+	
+	NVIC->ISER |= BIT(12);
+	NVIC->IPR[3] |= 0;
+	
+	line_funcs[0] = handler;
+}
+
+
+void _exti_line_handler()
+{
+	line_funcs[0]();
+	uint16_t gpio_lines = BIT_LAST(EXTI->PR, 16);
+	for (int i = 0; i < 16; ++i) {
+		if (gpio_lines & BIT(i)) {
+			line_funcs[i]();  /* Execute appropriate functions. */
+			EXTI->PR |= BIT(i);
+		}
+	}
 }

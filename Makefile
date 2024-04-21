@@ -27,12 +27,11 @@ CPY := arm-none-eabi-objcopy
 # Device-specific flags 
 DFLAGS := -mcpu=cortex-m0 -mthumb -mfloat-abi=softfp -mfpu=auto
 # Compiler flags
-CFLAGS := -g3 -Os -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -Wpadded -Wconversion  -ffunction-sections -fdata-sections -fno-common  # -fno-short-enums # newlib doesn't work well with this
+CFLAGS := -Os -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat-truncation -Wpadded -Wconversion  -ffunction-sections -fdata-sections -fno-common  # -fno-short-enums # newlib doesn't work well with this
 CFLAGS += $(DFLAGS)
 CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += $(INC_SRCH_PATH) $(LIB_SRCH_PATH)
-
-export MAKE_DIR LIBS CC LD CPY CFLAGS
+CFLAGS += -g3 -ggdb3
 
 
 .DEFAULT_GOAL = all
@@ -54,6 +53,10 @@ clean:
 	@$(MAKE) -C $(ROOT_DIR) -f root.mk clean
 
 flash:
-	@st-flash --reset write $(MAKE_DIR)/bin/firmware.bin 0x8000000
+	@openocd -f interface/stlink-v2.cfg -f board/stm32f0discovery.cfg -c "program bin/firmware.elf verify reset exit"
 
-.PHONY: all build clean flash 
+debug:
+	@openocd -f interface/stlink-v2.cfg -f board/stm32f0discovery.cfg -c "init" &
+	@arm-unknown-eabi-gdb bin/firmware.elf -x gdbconf
+
+.PHONY: all build clean flash debug

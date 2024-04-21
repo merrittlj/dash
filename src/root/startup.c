@@ -30,5 +30,9 @@ void (*const table[16 + 32])(void) = {
 	_estack,  /* Initial stack address */
 	_reset_handler,  /* Boot function */
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	_stk_handler
+	_stk_handler,  /* SysTick handler */
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	_exti_line_handler,  /* EXTI line handler */
+	_exti_line_handler,
+	_exti_line_handler,
 };

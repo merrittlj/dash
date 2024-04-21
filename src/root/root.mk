@@ -1,4 +1,4 @@
-TARGET = $(MAKE_DIR)/bin/firmware.bin
+TARGET = $(MAKE_DIR)/bin/firmware.elf
 SRCS = $(wildcard *.c)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 
@@ -11,8 +11,7 @@ OFLAGS  ?= -O binary
 
 $(TARGET): $(SRCS)
 	@mkdir -p $(MAKE_DIR)/bin
-	@$(LD) $^ $(CFLAGS) $(LDFLAGS) $(LIBS) -o intermediate.elf
-	@$(CPY) $(OFLAGS) intermediate.elf $@
+	@$(LD) $^ $(CFLAGS) $(LDFLAGS) $(LIBS) -o $(TARGET)
 	@echo "Generate program $(notdir $(TARGET)) from $^"
 
 clean:

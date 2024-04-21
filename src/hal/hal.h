@@ -9,6 +9,8 @@
 #define HAL_H
 #include <stdint.h>
 
+#include "common.h"
+
 
 struct gpio {
 	volatile uint32_t MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFR[2];
@@ -19,6 +21,7 @@ struct gpio {
 #define BANK(letter) ((uint8_t)((letter) - 'A'))
 
 #define BIT(x) (1UL << (x))
+#define BIT_LAST(x, y) (x & ((1 << y) - 1))  /* Last y bits. */
 
 /* uint16_t(2 bytes): upper byte = bank #, lower byte = pin # */
 #define PIN(bank, num) ((((bank) - 'A') << 8) | (num))  /* ex: PIN('C', 7) */
@@ -54,5 +57,37 @@ extern volatile uint32_t s_ticks;
 extern void stk_init(uint32_t reload);
 extern void _stk_handler();
 extern int timer_expired(uint32_t *t, uint32_t prd, uint32_t now);
+
+struct nvic {
+	volatile uint32_t ISER;
+	uint32_t reserved0[31];
+	volatile uint32_t ICER;
+	uint32_t reserved1[31];
+	volatile uint32_t ISPR;
+	uint32_t reserved2[31];
+	volatile uint32_t ICPR;
+	uint32_t reserved3[95];
+	volatile uint32_t IPR[8];
+};
+
+#define NVIC ((struct nvic *) 0x0E000E100)
+
+struct syscfg {
+	volatile uint32_t CFGR1, reserved, EXTICR[4], CFGR2;
+};
+
+#define SYSCFG ((struct syscfg *) 0x40010000)
+
+struct exti {
+	volatile uint32_t IMR, EMR, RTSR, FTSR, SWIER, PR;
+};
+
+#define EXTI ((struct exti *) 0x40010400)
+
+extern func_ptr line_funcs[32];  /* EXTI line functions. */
+extern void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr handler);
+extern void exti_simple_init(func_ptr handler);
+
+extern void _exti_line_handler();
 
 #endif
