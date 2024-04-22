@@ -5,3 +5,4 @@
 
 libs/
 prog/
+src/include/cmsis*

@@ -2,6 +2,8 @@ MAKE_DIR = $(PWD)
 SRC_DIR	 = $(MAKE_DIR)/src
 
 INCLUDE_DIR := $(SRC_DIR)/include
+CMSIS_CORE_DIR := $(INCLUDE_DIR)/cmsis_core
+CMSIS_FX_DIR := $(INCLUDE_DIR)/cmsis_f0
 ROOT_DIR    := $(SRC_DIR)/root
 HAL_DIR     := $(SRC_DIR)/hal
 PROG_DIR    := $(SRC_DIR)/prog
@@ -9,6 +11,8 @@ STATE_DIR   := $(SRC_DIR)/state
 
 INC_SRCH_PATH :=
 INC_SRCH_PATH += -I$(INCLUDE_DIR)
+INC_SRCH_PATH += -I$(CMSIS_CORE_DIR)/CMSIS/Core/Include
+INC_SRCH_PATH += -I$(CMSIS_FX_DIR)/Include
 INC_SRCH_PATH += -I$(ROOT_DIR)
 INC_SRCH_PATH += -I$(HAL_DIR)
 INC_SRCH_PATH += -I$(PROG_DIR)
@@ -31,32 +35,48 @@ CFLAGS := -Os -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion -Wformat
 CFLAGS += $(DFLAGS)
 CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += $(INC_SRCH_PATH) $(LIB_SRCH_PATH)
+CFLAGS += -D __ARM_FP=0 -D __ARM_FEATURE_SAT=0 -D __ARM_FEATURE_LDREX=0 -D __ARM_FEATURE_DSP=0
 CFLAGS += -g3 -ggdb3
+
+export MAKE_DIR CMSIS_CORE_DIR CMSIS_FX_DIR LIBS CC LD CPY CFLAGS
 
 
 .DEFAULT_GOAL = all
 
 all: build flash
 
-build:
+dep: $(CMSIS_CORE_DIR) $(CMSIS_FX_DIR)
+
+$(CMSIS_CORE_DIR):
+	@git clone --depth 1 -b v6.0.0 https://github.com/ARM-software/CMSIS_6 $@
+$(CMSIS_FX_DIR):
+	@git clone --depth 1 -b v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f0 $@
+
+build: dep
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk
 	@$(MAKE) -C $(STATE_DIR) -f state.mk
-	
 	@$(MAKE) -C $(ROOT_DIR) -f root.mk
+
+full_clean: clean dep_clean
 
 clean:
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk clean
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk clean
 	@$(MAKE) -C $(STATE_DIR) -f state.mk clean
-
 	@$(MAKE) -C $(ROOT_DIR) -f root.mk clean
 
+dep_clean:
+	@$(RM) -rf $(INCLUDE_DIR)/cmsis_core
+	@$(RM) -rf $(INCLUDE_DIR)/cmsis_f0
+
+rebuild: clean build
+
 flash:
-	@openocd -f interface/stlink-v2.cfg -f board/stm32f0discovery.cfg -c "program bin/firmware.elf verify reset exit"
+	@openocd -f interface/stlink.cfg -f board/stm32f0discovery.cfg -c "program bin/firmware.elf verify reset exit"
 
 debug:
-	@openocd -f interface/stlink-v2.cfg -f board/stm32f0discovery.cfg -c "init" &
-	@arm-unknown-eabi-gdb bin/firmware.elf -x gdbconf
+	@openocd -f interface/stlink.cfg -f board/stm32f0discovery.cfg -c "init" &
+	@arm-none-eabi-gdb bin/firmware.elf -x gdbconf
 
-.PHONY: all build clean flash debug
+.PHONY: all dep cmsis_core cmsis_f0 build clean dep_clean flash debug

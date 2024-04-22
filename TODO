@@ -1,5 +1,3 @@
-* Utilize interrupts
-	- Fix/debug button code
 * Get basic data on segmented display
 ** Further modularize build/files
 *** Logging?

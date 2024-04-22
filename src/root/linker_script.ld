@@ -1,4 +1,4 @@
-ENTRY(_reset_handler)	/* Enter in the _reset_handler function(handles init.). */
+ENTRY(Reset_Handler)	/* Defined in CMSIS. */
 
 MEMORY
 {
@@ -36,7 +36,7 @@ SECTIONS
 		. = ALIGN(4);
 		_edata = .;
 	} >SRAM AT> FLASH  /* SRAM is relocation address(where the section will be when the code is executed), FLASH is load address(where the section is loaded from to the target). */
-	_fdata = LOADADDR(.data);  /* Set _fdata(flash data) to .data's load address(FLASH). */
+	_sidata = LOADADDR(.data);  /* Set to .data's load address(FLASH). */
 
 	.bss :
 	{

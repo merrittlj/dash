@@ -8,6 +8,7 @@ $(LIB): $(OBJS)
 	@echo "Archive $(notdir $@)"
 
 %.o: %.c
+	@echo "make: $(MAKE_DIR)"
 	@$(CC) $(CFLAGS) -c $^ -o $@
 	@echo "CC $@"
 
