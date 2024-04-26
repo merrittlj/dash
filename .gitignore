@@ -4,5 +4,5 @@
 *.map
 
 libs/
-prog/
+bin/
 src/include/cmsis*
