@@ -21,8 +21,9 @@
 #define BIT_LAST(x, y) (x & ((1UL << y) - 1))  /* Last y bits. */
 
 /* uint16_t(2 bytes): upper byte = bank #, lower byte = pin # */
-#define PIN(bank, num) ((((bank) - 'A') << 8) | (num))  /* ex: PIN('C', 7) */
-#define PIN_NUM(pin) ((uint8_t)BIT_LAST(pin, 8))
+//#define PIN(bank, num) ((uint16_t)((uint16_t)((uint16_t)(bank) - (uint16_t)('A')) << 8UL) | (uint16_t)(num))
+#define PIN(bank, num) ((uint16_t)(((uint16_t)((unsigned char)(bank) - (unsigned char)('A'))) << 8) | (uint16_t)(num))
+#define PIN_NUM(pin) ((uint8_t)(BIT_LAST(pin, 8)))
 #define PIN_BANK(pin) ((uint8_t)((pin) >> 8))
 
 /* GPIO input/output modes. */

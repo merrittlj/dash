@@ -79,4 +79,7 @@ debug:
 	@openocd -f interface/stlink.cfg -f board/stm32f0discovery.cfg -c "init" &
 	@arm-none-eabi-gdb bin/firmware.elf -x gdbconf
 
-.PHONY: all dep cmsis_core cmsis_f0 build clean dep_clean flash debug
+test:
+	@act --job act-linux
+
+.PHONY: all dep cmsis_core cmsis_f0 build clean dep_clean flash debug test

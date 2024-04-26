@@ -42,7 +42,7 @@ uint8_t gpio_read(uint16_t pin)
 void rcc_port_set(uint8_t bank, uint8_t mode)
 {
 	int n = (17 + bank);
-	RCC->AHBENR = (RCC->AHBENR & ~BIT(n)) | (mode << n);  /* Clear, then set bit. */
+	RCC->AHBENR = (RCC->AHBENR & ~BIT(n)) | (uint32_t)(mode << n);  /* Clear, then set bit. */
 }
 
 int timer_expired(uint32_t *t, uint32_t prd, uint32_t now)
@@ -71,7 +71,7 @@ void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr hand
 	volatile uint32_t *edge_selection = (&EXTI->FTSR - rising);  /* Rising/falling edge. */
 	*edge_selection |= BIT(n);
 
-	SYSCFG->EXTICR[n / 4] |= PIN_BANK(pin) << ((n - (4 * (n / 4))) * 4);  /* Set source input for respective EXTI line. */
+	SYSCFG->EXTICR[n / 4] |= (uint32_t)(PIN_BANK(pin) << ((n - (4 * (n / 4))) * 4));  /* Set source input for respective EXTI line. */
 	
 	uint8_t irq_pos = n < 2 ? EXTI0_1_IRQn : n < 4 ? EXTI2_3_IRQn : EXTI4_15_IRQn;
 	NVIC_EnableIRQ(irq_pos);
