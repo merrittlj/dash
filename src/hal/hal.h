@@ -19,20 +19,24 @@
 
 #define BIT(x) (1UL << (x))
 #define BIT_LAST(x, y) (x & ((1UL << y) - 1))  /* Last y bits. */
+#define BITS_SET(x) ((BIT(x) - 1))
+#define BIT_FIELD_CLEAR(x, size) ((uint32_t)~(BITS_SET(size) << (x * size)))
+#define BIT_FIELD_SET(x, size, val) ((val & BITS_SET(size)) << (x * size))
 
 /* uint16_t(2 bytes): upper byte = bank #, lower byte = pin # */
-//#define PIN(bank, num) ((uint16_t)((uint16_t)((uint16_t)(bank) - (uint16_t)('A')) << 8UL) | (uint16_t)(num))
-#define PIN(bank, num) ((uint16_t)(((uint16_t)((unsigned char)(bank) - (unsigned char)('A'))) << 8) | (uint16_t)(num))
+#define PIN(bank, num) ((uint16_t)((uint16_t)((uint16_t)(bank) - (uint16_t)('A')) << 8UL) | (uint16_t)(num))
 #define PIN_NUM(pin) ((uint8_t)(BIT_LAST(pin, 8)))
 #define PIN_BANK(pin) ((uint8_t)((pin) >> 8))
 
 /* GPIO input/output modes. */
+enum {GPIO_PULL_NONE, GPIO_PULL_UP, GPIO_PULL_DOWN};
 enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_ALT, GPIO_MODE_ANALOG};
 enum {GPIO_OUTPUT_CLEAR, GPIO_OUTPUT_SET};
 
 /* Enable/disable RCC. */
 enum {RCC_PORT_DISABLE, RCC_PORT_ENABLE};
 
+extern void gpio_set_pull(uint16_t pin, uint8_t mode);
 extern void gpio_set_mode(uint16_t pin, uint8_t mode);
 extern void gpio_write(uint16_t pin, uint8_t mode);
 extern uint8_t gpio_read(uint16_t pin);
@@ -42,10 +46,10 @@ extern void rcc_port_set(uint8_t bank, uint8_t mode);
 extern volatile uint32_t s_ticks;
 
 extern int timer_expired(uint32_t *t, uint32_t prd, uint32_t now);
+extern void hard_delay(uint32_t prd);  /* Hard delay, like Arduino's delay(). */
 
 extern func_ptr line_funcs[32];  /* EXTI line functions. */
 extern void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr handler);
-extern void exti_simple_init(func_ptr handler);
 
 
 /* Functions referenced in CMSIS. */

@@ -31,59 +31,44 @@ const struct state DEFAULT_FSM[NUM_DEFAULT_STATES] = {
 	}
 };
 
-struct button_data bd;
-
 void write_builtin_led(uint8_t color, uint8_t mode)
 {
 	gpio_set_mode(PIN('C', color), GPIO_MODE_OUTPUT);
 	gpio_write(PIN('C', color), mode);
 }
 
-void button_vars_init(uint16_t button, struct fsm *machine, uint32_t *debounce_timer, uint32_t debounce_period, uint32_t *idle_timer, uint32_t idle_period)
-{
-	bd.button = button;
-	bd.machine = machine;
-	bd.debounce_timer = debounce_timer;
-	bd.debounce_period = debounce_period;
-	bd.idle_timer = idle_timer;
-	bd.idle_period = idle_period;
-}
-
-void button_handler()
-{
-	*bd.idle_timer = s_ticks + bd.idle_period;
-	fsm_next(bd.machine);
-
-	while (gpio_read(bd.button)) (void) 0;
-	while (!timer_expired(bd.debounce_timer, bd.debounce_period, s_ticks)) (void) 0;
-}
-
 void max_speed_action()
 {
-	write_builtin_led(LED_COLOR_RED, GPIO_OUTPUT_SET);
+	gpio_set_mode(PIN('C', 14), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('C', 14), GPIO_OUTPUT_SET);
 }
 
 void max_speed_transition()
 {
-	write_builtin_led(LED_COLOR_RED, GPIO_OUTPUT_CLEAR);
+	gpio_set_mode(PIN('C', 14), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('C', 14), GPIO_OUTPUT_CLEAR);
 }
 
 void trip_distance_action()
 {
-	write_builtin_led(LED_COLOR_GREEN, GPIO_OUTPUT_SET);
+	gpio_set_mode(PIN('C', 15), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('C', 15), GPIO_OUTPUT_SET);
 }
 
 void trip_distance_transition()
 {
-	write_builtin_led(LED_COLOR_GREEN, GPIO_OUTPUT_CLEAR);
+	gpio_set_mode(PIN('C', 15), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('C', 15), GPIO_OUTPUT_CLEAR);
 }
 
 void total_distance_action()
 {
-	write_builtin_led(LED_COLOR_BLUE, GPIO_OUTPUT_SET);
+	gpio_set_mode(PIN('F', 0), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('F', 0), GPIO_OUTPUT_SET);
 }
 
 void total_distance_transition()
 {
-	write_builtin_led(LED_COLOR_BLUE, GPIO_OUTPUT_CLEAR);
+	gpio_set_mode(PIN('F', 0), GPIO_MODE_OUTPUT);
+	gpio_write(PIN('F', 0), GPIO_OUTPUT_CLEAR);
 }

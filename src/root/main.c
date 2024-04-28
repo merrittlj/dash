@@ -17,27 +17,31 @@
 
 int main()
 {
-	uint32_t debounce_timer, debounce_period = 50;
+	uint32_t debounce_timer, debounce_period = 20;
 	uint32_t idle_timer, idle_period = 10000;
 
-	uint16_t usrbtn = PIN('A', 0);
-
+	uint16_t usrbtn = PIN('C', 13);
+	uint8_t button_pressed = 0;
 	gpio_set_mode(usrbtn, GPIO_MODE_INPUT);
-
-	exti_pin_init(usrbtn, 1, 255, button_handler);
 
 	struct fsm machine;
 	fsm_init(&machine, DEFAULT_FSM, STATE_MAX_SPEED);
 
-	button_vars_init(usrbtn, &machine, &debounce_timer, debounce_period, &idle_timer, idle_period);
-
 	NVIC_SetPriority (SysTick_IRQn, 0);
 	for (;;) {
+		/* To prevent debounce, simply poll the button every 50ms or so. */
+		if (timer_expired(&debounce_timer, debounce_period, s_ticks)) {
+			if (!gpio_read(usrbtn) && !button_pressed) {  /* Button input is pull-up. */
+				button_pressed = 1;
+
+				idle_timer = s_ticks + idle_period;
+				fsm_next(&machine);
+			} else if (gpio_read(usrbtn)) button_pressed = 0;
+		}
 		if (timer_expired(&idle_timer, idle_period, s_ticks)) {
-			write_builtin_led(LED_COLOR_RED, GPIO_OUTPUT_CLEAR);
-			write_builtin_led(LED_COLOR_GREEN, GPIO_OUTPUT_CLEAR);
-			write_builtin_led(LED_COLOR_BLUE, GPIO_OUTPUT_CLEAR);
-			write_builtin_led(LED_COLOR_ORANGE, GPIO_OUTPUT_CLEAR);
+			gpio_write(PIN('C', 14), GPIO_OUTPUT_CLEAR);
+			gpio_write(PIN('C', 15), GPIO_OUTPUT_CLEAR);
+			gpio_write(PIN('F', 0), GPIO_OUTPUT_CLEAR);
 		}
 	}
 

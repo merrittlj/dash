@@ -17,16 +17,24 @@ volatile uint32_t s_ticks = 0;
 
 func_ptr line_funcs[32];
 
+void gpio_set_pull(uint16_t pin, uint8_t mode)
+{
+	GPIO_TypeDef *b = GPIO(PIN_BANK(pin));
+	uint8_t n = PIN_NUM(pin);
+	b->PUPDR &= BIT_FIELD_CLEAR(n, 2);
+	b->PUPDR |= BIT_FIELD_SET(n, 2, mode);
+}
+
 void gpio_set_mode(uint16_t pin, uint8_t mode)
 {
 	GPIO_TypeDef *b = GPIO(PIN_BANK(pin));
 	uint8_t n = PIN_NUM(pin);
 
 	rcc_port_set(PIN_BANK(pin), RCC_PORT_ENABLE);
+	if (mode == GPIO_MODE_INPUT) gpio_set_pull(pin, GPIO_PULL_UP);
 
-	// 2 bits for each pin so we multiply the pin # by 2.
-	b->MODER &= (uint32_t)~(3U << (n * 2));  /* Clear pin mode. */
-	b->MODER |= (mode & 3U) << (n * 2);  /* Set pin mode("& 3" ensures bounds). */
+	b->MODER &= BIT_FIELD_CLEAR(n, 2);
+	b->MODER |= BIT_FIELD_SET(n, 2, mode);
 }
 
 void gpio_write(uint16_t pin, uint8_t mode)
@@ -50,8 +58,14 @@ int timer_expired(uint32_t *t, uint32_t prd, uint32_t now)
 	if (now + prd < *t) *t = 0;  /* Check if time wrapped. */
 	if (*t == 0) *t = now + prd;
 	if (*t > now) return 0;
-	*t = (now - *t) > prd ? now + prd : *t + prd;  /* Adjust the timer to correct for lateness, or adjust the timer to the next period. This code is genius beyond my understanding. */
+	*t = (now - *t) > prd ? now + prd : *t + prd;  /* Adjust the timer to correct for lateness, or adjust the timer to the next period. */
 	return 1;
+}
+
+void hard_delay(uint32_t prd)
+{
+	const uint32_t t = s_ticks + prd;
+	while (t > s_ticks) (void) 0;
 }
 
 /*
@@ -90,8 +104,8 @@ void EXTI_Common_IRQHandler()
 	uint16_t gpio_lines = BIT_LAST(EXTI->PR, 16);
 	for (int i = 0; i < 16; ++i) {
 		if (gpio_lines & BIT(i)) {
+			EXTI->PR &= BIT(i);
 			line_funcs[i]();  /* Execute appropriate functions. */
-			EXTI->PR |= BIT(i);
 		}
 	}
 }

@@ -18,22 +18,6 @@ enum {LED_COLOR_RED = 6, LED_COLOR_BLUE, LED_COLOR_ORANGE, LED_COLOR_GREEN};
 /* Write LED color on port to mode. */
 extern void write_builtin_led(uint8_t color, uint8_t mode);
 
-/* TODO: find a better way to do this... */
-struct button_data {
-	uint16_t button;
-	char _padding[2];
-	struct fsm *machine;
-	uint32_t *debounce_timer;
-	uint32_t debounce_period;
-	uint32_t *idle_timer;
-	uint32_t idle_period;
-};
-
-extern struct button_data bd;
-
-extern void button_vars_init(uint16_t button, struct fsm *machine, uint32_t *debounce_timer, uint32_t debounce_period, uint32_t *idle_timer, uint32_t idle_period);
-extern void button_handler();
-
 /* States for the default FSM. */
 enum {STATE_MAX_SPEED, STATE_TRIP_DISTANCE, STATE_TOTAL_DISTANCE, NUM_DEFAULT_STATES};
 
