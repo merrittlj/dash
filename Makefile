@@ -8,6 +8,7 @@ ROOT_DIR    := $(SRC_DIR)/root
 HAL_DIR     := $(SRC_DIR)/hal
 PROG_DIR    := $(SRC_DIR)/prog
 STATE_DIR   := $(SRC_DIR)/state
+SEG_DIR    := $(SRC_DIR)/seg
 
 INC_SRCH_PATH :=
 INC_SRCH_PATH += -I$(INCLUDE_DIR)
@@ -17,11 +18,12 @@ INC_SRCH_PATH += -I$(ROOT_DIR)
 INC_SRCH_PATH += -I$(HAL_DIR)
 INC_SRCH_PATH += -I$(PROG_DIR)
 INC_SRCH_PATH += -I$(STATE_DIR)
+INC_SRCH_PATH += -I$(SEG_DIR)
 
 LIB_SRCH_PATH := 
 LIB_SRCH_PATH += -L$(MAKE_DIR)/libs
 
-LIBS := -lhal -lprog -lstate -lc -lgcc
+LIBS := -lhal -lprog -lstate -lseg -lc -lgcc -lm
 
 # Toolchain
 CC  := arm-none-eabi-gcc
@@ -56,6 +58,7 @@ build: dep
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk
 	@$(MAKE) -C $(STATE_DIR) -f state.mk
+	@$(MAKE) -C $(SEG_DIR) -f seg.mk
 	@$(MAKE) -C $(ROOT_DIR) -f root.mk
 
 full_clean: clean dep_clean
@@ -64,6 +67,7 @@ clean:
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk clean
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk clean
 	@$(MAKE) -C $(STATE_DIR) -f state.mk clean
+	@$(MAKE) -C $(SEG_DIR) -f seg.mk clean
 	@$(MAKE) -C $(ROOT_DIR) -f root.mk clean
 
 dep_clean:

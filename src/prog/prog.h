@@ -9,14 +9,18 @@
 #define PROG_H
 #include <stdint.h>
 
+#include "hal.h"
 #include "state.h"
 
 
-/* LED pin #'s. */
-enum {LED_COLOR_RED = 6, LED_COLOR_BLUE, LED_COLOR_ORANGE, LED_COLOR_GREEN};
-
-/* Write LED color on port to mode. */
-extern void write_builtin_led(uint8_t color, uint8_t mode);
+/* Pins */
+#define STATEBTN_PIN (PIN('C', 13))
+#define LED_RED_PIN (PIN('B', 5))
+#define LED_GREEN_PIN (PIN('B', 4))
+#define LED_BLUE_PIN (PIN('B', 3))
+#define SHIFT_SER_PIN (PIN('A', 10))
+#define SHIFT_RCLK_PIN (PIN('A', 9))
+#define SHIFT_SRCLK_PIN (PIN('A', 8))
 
 /* States for the default FSM. */
 enum {STATE_MAX_SPEED, STATE_TRIP_DISTANCE, STATE_TOTAL_DISTANCE, NUM_DEFAULT_STATES};

@@ -31,44 +31,35 @@ const struct state DEFAULT_FSM[NUM_DEFAULT_STATES] = {
 	}
 };
 
-void write_builtin_led(uint8_t color, uint8_t mode)
-{
-	gpio_set_mode(PIN('C', color), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('C', color), mode);
-}
-
 void max_speed_action()
 {
-	gpio_set_mode(PIN('C', 14), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('C', 14), GPIO_OUTPUT_SET);
+	gpio_set_mode(LED_RED_PIN, GPIO_MODE_OUTPUT);
+	gpio_write(LED_RED_PIN, GPIO_OUTPUT_SET);
 }
 
 void max_speed_transition()
 {
-	gpio_set_mode(PIN('C', 14), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('C', 14), GPIO_OUTPUT_CLEAR);
+	gpio_write(LED_RED_PIN, GPIO_OUTPUT_CLEAR);
 }
 
 void trip_distance_action()
 {
-	gpio_set_mode(PIN('C', 15), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('C', 15), GPIO_OUTPUT_SET);
+	gpio_set_mode(LED_GREEN_PIN, GPIO_MODE_OUTPUT);
+	gpio_write(LED_GREEN_PIN, GPIO_OUTPUT_SET);
 }
 
 void trip_distance_transition()
 {
-	gpio_set_mode(PIN('C', 15), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('C', 15), GPIO_OUTPUT_CLEAR);
+	gpio_write(LED_GREEN_PIN, GPIO_OUTPUT_CLEAR);
 }
 
 void total_distance_action()
 {
-	gpio_set_mode(PIN('F', 0), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('F', 0), GPIO_OUTPUT_SET);
+	gpio_set_mode(LED_BLUE_PIN, GPIO_MODE_OUTPUT);
+	gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_SET);
 }
 
 void total_distance_transition()
 {
-	gpio_set_mode(PIN('F', 0), GPIO_MODE_OUTPUT);
-	gpio_write(PIN('F', 0), GPIO_OUTPUT_CLEAR);
+	gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_CLEAR);
 }

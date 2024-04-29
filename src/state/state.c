@@ -18,6 +18,11 @@ void fsm_init(struct fsm *f, const struct state *table, uint8_t state)
 	f->table[f->cur].action();
 }
 
+void fsm_action(struct fsm *f)
+{
+	f->table[f->cur].action();
+}
+
 void fsm_next(struct fsm *f)
 {
 	f->table[f->cur].transition();

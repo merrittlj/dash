@@ -30,6 +30,7 @@ struct fsm {
 
 /* Set appropriate variables in struct and start first state's action. */
 extern void fsm_init(struct fsm *f, const struct state *table, uint8_t state);
+extern void fsm_action(struct fsm *f);  /* Run current state action. */
 /* Transition out of current state, go to next state, start state action. */
 extern void fsm_next(struct fsm *f);
 
