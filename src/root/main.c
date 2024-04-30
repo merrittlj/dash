@@ -21,7 +21,7 @@ int main()
 	uint32_t debounce_timer, debounce_period = 20;
 	uint32_t idle_timer, idle_period = 10000;
 	uint8_t is_idle = 0;
-	uint32_t seg_timer, seg_period = 1000;
+	uint32_t seg_timer, seg_period = 5;
 
 	uint8_t button_pressed = 0;
 	gpio_set_mode(STATEBTN_PIN, GPIO_MODE_INPUT);
@@ -33,11 +33,12 @@ int main()
 	gpio_set_mode(SHIFT_RCLK_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(SHIFT_SRCLK_PIN, GPIO_MODE_OUTPUT);
 	
-	seg_pins(SHIFT_SER_PIN, SHIFT_RCLK_PIN, SHIFT_SRCLK_PIN);
-	seg_clear_output();
-	
+	gpio_set_mode(DP1_PIN, GPIO_MODE_OUTPUT);
+	gpio_set_mode(DP2_PIN, GPIO_MODE_OUTPUT);
+	gpio_set_mode(DP3_PIN, GPIO_MODE_OUTPUT);
+	gpio_set_mode(DP4_PIN, GPIO_MODE_OUTPUT);
+		
 	NVIC_SetPriority (SysTick_IRQn, 0);
-	uint8_t x = 0;
 	for (;;) {
 		/* To prevent debounce, simply poll the button every 50ms or so. */
 		if (timer_expired(&debounce_timer, debounce_period, s_ticks)) {
@@ -61,10 +62,8 @@ int main()
 			gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_CLEAR);
 			seg_clear_output();
 		}
-		if (timer_expired(&seg_timer, seg_period, s_ticks)) {
-			seg_clear_output();
-			seg_display_digit(x, 0);
-			++x; x = x % 10;
+		if (timer_expired(&seg_timer, seg_period, s_ticks) && !is_idle) {
+			seg_display_next();
 		}
 	}
 

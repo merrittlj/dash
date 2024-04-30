@@ -1,3 +1,5 @@
-* Get basic data on segmented display
+* Seven segment display improvements
+	- No leading zeros
+	- ifndefs to optionally remove 4 digit support
 ** Further modularize build/files
 *** Logging?

@@ -5,10 +5,10 @@
  * description:	Implementation for seg.h
  */
 #include <stdint.h>
-#include <math.h>
 
 #include "seg.h"
 #include "hal.h"
+#include "embmath.h"
 
 
 static uint16_t _display_num;
@@ -19,11 +19,17 @@ static uint16_t _ser;
 static uint16_t _rclk;
 static uint16_t _srclk;
 
-void seg_pins(uint16_t ser, uint16_t rclk, uint16_t srclk)
+static uint16_t _displays[4];
+
+void seg_pins(uint16_t ser, uint16_t rclk, uint16_t srclk, uint16_t dp1, uint16_t dp2, uint16_t dp3, uint16_t dp4)
 {
 	_ser = ser;
 	_rclk = rclk;
 	_srclk = srclk;
+	_displays[0] = dp1;
+	_displays[1] = dp2;
+	_displays[2] = dp3;
+	_displays[3] = dp4;
 }
 
 void seg_update_output()
@@ -100,9 +106,13 @@ uint8_t get_num_index()
 
 void seg_display_next()
 {
+	/* TODO: Do not display 0 if it is leading. */
 	seg_clear_output();
-	/* TODO: set display to _num_index */
-	seg_display_digit((uint8_t)((_display_num / (uint16_t)(pow(10, 3 - _num_index))) % 10), _num_index == _decimal_loc);
+	if (_num_index > 0) gpio_write(_displays[_num_index - 1], GPIO_OUTPUT_CLEAR);
+	if (_num_index == 0) gpio_write(_displays[3], GPIO_OUTPUT_CLEAR);
+	gpio_write(_displays[_num_index], GPIO_OUTPUT_SET);
+	uint8_t decimal_enabled = (_num_index == (_decimal_loc - 1)) && _decimal_loc <= 4;
+	seg_display_digit((uint8_t)((_display_num / (uint16_t)(ipow(10, 3 - _num_index))) % 10), decimal_enabled);
 
 	++_num_index;
 	_num_index = _num_index % 4;

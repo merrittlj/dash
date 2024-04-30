@@ -12,7 +12,7 @@
 #include "common.h"
 
 
-extern void seg_pins(uint16_t ser, uint16_t rclk, uint16_t srclk);  /* Set pins to use. */
+extern void seg_pins(uint16_t ser, uint16_t rclk, uint16_t srclk, uint16_t dp1, uint16_t dp2, uint16_t dp3, uint16_t dp4);  /* Set pins to use. */
 
 extern void seg_update_output();  /* Clock RCLK. */
 extern void seg_send_bit(uint8_t bit);  /* Send a bit to the shift register. */

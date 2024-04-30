@@ -9,6 +9,7 @@
 
 #include "prog.h"
 #include "hal.h"
+#include "seg.h"
 
 
 const struct state DEFAULT_FSM[NUM_DEFAULT_STATES] = {
@@ -35,6 +36,10 @@ void max_speed_action()
 {
 	gpio_set_mode(LED_RED_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(LED_RED_PIN, GPIO_OUTPUT_SET);
+
+	seg_pins(SHIFT_SER_PIN, SHIFT_RCLK_PIN, SHIFT_SRCLK_PIN, DP1_PIN, DP2_PIN, DP3_PIN, DP4_PIN);  /* TODO: Change this. */
+	seg_init(2395, 2);
+	seg_display_next();
 }
 
 void max_speed_transition()
@@ -46,6 +51,9 @@ void trip_distance_action()
 {
 	gpio_set_mode(LED_GREEN_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(LED_GREEN_PIN, GPIO_OUTPUT_SET);
+
+	seg_init(7253, 1);
+	seg_display_next();
 }
 
 void trip_distance_transition()
@@ -57,6 +65,9 @@ void total_distance_action()
 {
 	gpio_set_mode(LED_BLUE_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_SET);
+
+	seg_init(92, 255);
+	seg_display_next();
 }
 
 void total_distance_transition()
