@@ -74,45 +74,51 @@ void seg_init(uint16_t num, uint8_t decimal)
 	set_num_index(0);
 }
 
-void set_display_num(uint16_t num)
+void __attribute__((optimize("O0"))) set_display_num(uint16_t num)
 {
 	_display_num = num;
 }
 
-uint16_t get_display_num()
+uint16_t __attribute__((optimize("O0"))) get_display_num()
 {
 	return _display_num;
 }
 
-void set_decimal_loc(uint8_t decimal)
+void __attribute__((optimize("O0"))) set_decimal_loc(uint8_t decimal)
 {
 	_decimal_loc = decimal;
 }
 
-uint8_t get_decimal_loc()
+uint8_t __attribute__((optimize("O0"))) get_decimal_loc()
 {
 	return _decimal_loc;
 }
 
-void set_num_index(uint8_t index)
+void __attribute__((optimize("O0"))) set_num_index(uint8_t index)
 {
 	_num_index = index;
 }
 
-uint8_t get_num_index()
+uint8_t __attribute__((optimize("O0"))) get_num_index()
 {
 	return _num_index;
 }
 
+uint8_t current_digit()
+{
+	return (uint8_t)((_display_num / (uint16_t)(ipow(10, 3 - _num_index))) % 10);
+}
+
 void seg_display_next()
 {
-	/* TODO: Do not display 0 if it is leading. */
 	seg_clear_output();
 	if (_num_index > 0) gpio_write(_displays[_num_index - 1], GPIO_OUTPUT_CLEAR);
 	if (_num_index == 0) gpio_write(_displays[3], GPIO_OUTPUT_CLEAR);
-	gpio_write(_displays[_num_index], GPIO_OUTPUT_SET);
-	uint8_t decimal_enabled = (_num_index == (_decimal_loc - 1)) && _decimal_loc <= 4;
-	seg_display_digit((uint8_t)((_display_num / (uint16_t)(ipow(10, 3 - _num_index))) % 10), decimal_enabled);
+	if (!(current_digit() == 0 && (uint16_t)(ipow(10, 4 - _num_index)) > _display_num)) {
+		gpio_write(_displays[_num_index], GPIO_OUTPUT_SET);
+		uint8_t decimal_enabled = (_num_index == (_decimal_loc - 1)) && _decimal_loc <= 4;
+		seg_display_digit(current_digit(), decimal_enabled);
+	}
 
 	++_num_index;
 	_num_index = _num_index % 4;

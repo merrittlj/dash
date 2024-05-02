@@ -53,8 +53,20 @@ void rcc_port_set(uint8_t bank, uint8_t mode)
 	RCC->AHBENR = (RCC->AHBENR & ~BIT(n)) | (uint32_t)(mode << n);  /* Clear, then set bit. */
 }
 
+void disable_timer(uint32_t *prd)
+{
+	*prd = 0;
+}
+
+void enable_timer(uint32_t *t, uint32_t *prd, uint32_t new_prd, uint32_t now)
+{
+	*prd = new_prd;
+	*t = now + *prd;
+}
+
 int timer_expired(uint32_t *t, uint32_t prd, uint32_t now)
 {
+	if (prd == 0) return 0;  /* Timer disabled. */
 	if (now + prd < *t) *t = 0;  /* Check if time wrapped. */
 	if (*t == 0) *t = now + prd;
 	if (*t > now) return 0;
@@ -129,6 +141,7 @@ void SystemInit(void)
 {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
 	SysTick_Config(8000000 / 1000);
+	NVIC_SetPriority (SysTick_IRQn, 0);
 }
 
 void _init() {;}

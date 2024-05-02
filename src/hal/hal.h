@@ -45,6 +45,8 @@ extern void rcc_port_set(uint8_t bank, uint8_t mode);
 
 extern volatile uint32_t s_ticks;
 
+extern void disable_timer(uint32_t *prd);
+extern void enable_timer(uint32_t *t, uint32_t *prd, uint32_t new_prd, uint32_t now);
 extern int timer_expired(uint32_t *t, uint32_t prd, uint32_t now);
 extern void hard_delay(uint32_t prd);  /* Hard delay, like Arduino's delay(). */
 

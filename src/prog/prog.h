@@ -39,4 +39,7 @@ extern void trip_distance_transition();
 extern void total_distance_action();
 extern void total_distance_transition();
 
+/* Easter eggs: */
+extern void timer_mode();
+
 #endif

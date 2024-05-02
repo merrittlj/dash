@@ -8,4 +8,4 @@ jobs:
     - run: apt-get update
     - run: apt install sudo
     - run: sudo apt -y install gcc-arm-none-eabi make openocd git
-    - run: make
+    - run: make build

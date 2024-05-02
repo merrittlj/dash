@@ -25,9 +25,6 @@ int main()
 
 	uint8_t button_pressed = 0;
 	gpio_set_mode(STATEBTN_PIN, GPIO_MODE_INPUT);
-
-	struct fsm machine;
-	fsm_init(&machine, DEFAULT_FSM, STATE_MAX_SPEED);
 	
 	gpio_set_mode(SHIFT_SER_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(SHIFT_RCLK_PIN, GPIO_MODE_OUTPUT);
@@ -38,7 +35,9 @@ int main()
 	gpio_set_mode(DP3_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(DP4_PIN, GPIO_MODE_OUTPUT);
 		
-	NVIC_SetPriority (SysTick_IRQn, 0);
+	struct fsm machine;
+	fsm_init(&machine, DEFAULT_FSM, STATE_MAX_SPEED);
+
 	for (;;) {
 		/* To prevent debounce, simply poll the button every 50ms or so. */
 		if (timer_expired(&debounce_timer, debounce_period, s_ticks)) {
@@ -47,6 +46,7 @@ int main()
 				/* Capture first button press and re-do the action. */
 				if (is_idle) {
 					is_idle = 0;
+					enable_timer(&idle_timer, &idle_period, 10000, s_ticks);
 					fsm_action(&machine);
 					continue;
 				}
@@ -61,6 +61,7 @@ int main()
 			gpio_write(LED_GREEN_PIN, GPIO_OUTPUT_CLEAR);
 			gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_CLEAR);
 			seg_clear_output();
+			disable_timer(&idle_period);
 		}
 		if (timer_expired(&seg_timer, seg_period, s_ticks) && !is_idle) {
 			seg_display_next();

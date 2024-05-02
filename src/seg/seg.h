@@ -33,6 +33,7 @@ extern uint8_t get_decimal_loc();
 extern void set_num_index(uint8_t index);
 extern uint8_t get_num_index();
 
+extern uint8_t current_digit();
 extern void seg_display_next();  /* Display the next digit in the num. */
 
 #endif
