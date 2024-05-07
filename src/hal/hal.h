@@ -30,7 +30,7 @@
 
 /* GPIO input/output modes. */
 enum {GPIO_PULL_NONE, GPIO_PULL_UP, GPIO_PULL_DOWN};
-enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_ALT, GPIO_MODE_ANALOG};
+enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG};
 enum {GPIO_OUTPUT_CLEAR, GPIO_OUTPUT_SET};
 
 /* Enable/disable RCC. */
@@ -40,6 +40,8 @@ extern void gpio_set_pull(uint16_t pin, uint8_t mode);
 extern void gpio_set_mode(uint16_t pin, uint8_t mode);
 extern void gpio_write(uint16_t pin, uint8_t mode);
 extern uint8_t gpio_read(uint16_t pin);
+extern void gpio_set_af(uint16_t pin, uint8_t af);
+
 /* Enable/disable the clock on a GPIO port. */
 extern void rcc_port_set(uint8_t bank, uint8_t mode);
 
@@ -53,6 +55,9 @@ extern void hard_delay(uint32_t prd);  /* Hard delay, like Arduino's delay(). */
 extern func_ptr line_funcs[32];  /* EXTI line functions. */
 extern void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr handler);
 
+
+/* TX/RX pads are connected to USART2. */
+extern void uart_init(struct USART_TypeDef *uart, uint32_t baud);
 
 /* Functions referenced in CMSIS. */
 extern void SysTick_Handler();

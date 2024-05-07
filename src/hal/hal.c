@@ -47,6 +47,14 @@ uint8_t gpio_read(uint16_t pin)
 	return (GPIO(PIN_BANK(pin))->IDR >> PIN_NUM(pin)) & 1;
 }
 
+void gpio_set_af(uint16_t pin, uint8_t af)
+{
+	GPIO_TypeDef *gpio = GPIO(PIN_BANK(pin));
+	uint8_t n = (PIN_NUM(pin)) - (8 * (n >> 3));
+	gpio->AFR[n >> 3] &= BIT_FIELD_CLEAR(n, 4);
+	gpio->AFR[n >> 3] |= BIT_FIELD_SET(n, 4, af);
+}
+
 void rcc_port_set(uint8_t bank, uint8_t mode)
 {
 	int n = (17 + bank);
@@ -104,6 +112,26 @@ void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr hand
 	NVIC_SetPriority(irq_pos, priority);
 	
 	line_funcs[n] = handler;
+}
+
+void uart_init(struct USART_TypeDef *uart, uint32_t baud)
+{
+	if (uart == USART1) RCC->APB2ENR |= BIT(14);
+	if (uart == USART2) RCC->APB1ENR |= BIT(17);
+	if (uart == USART3) RCC->APB1ENR |= BIT(18);
+	
+	uint16_t tx, rx;
+	if (uart == USART1) tx = PIN('B', 6), rx = PIN('B', 7);
+	if (uart == USART2) tx = PIN('D', 5), rx = PIN('D', 6);
+	if (uart == USART3) tx = PIN('D', 8), rx = PIN('D', 9);
+
+	gpio_set_mode(tx, GPIO_MODE_AF);
+	gpio_set_mode(rx, GPIO_MODE_AF);
+	gpio_set_af(tx, 0);
+	gpio_set_af(rx, 0);
+
+	uart->CR1 = 0;  /* Disable this line. */
+	uart->BRR = FREQ / baud;
 }
 
 void SysTick_Handler()
