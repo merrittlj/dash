@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "stm32f072xb.h"
 #include "common.h"
@@ -50,9 +51,18 @@ uint8_t gpio_read(uint16_t pin)
 void gpio_set_af(uint16_t pin, uint8_t af)
 {
 	GPIO_TypeDef *gpio = GPIO(PIN_BANK(pin));
-	uint8_t n = (PIN_NUM(pin)) - (8 * (n >> 3));
-	gpio->AFR[n >> 3] &= BIT_FIELD_CLEAR(n, 4);
-	gpio->AFR[n >> 3] |= BIT_FIELD_SET(n, 4, af);
+	uint8_t n = PIN_NUM(pin);
+	uint8_t x = (n - (uint8_t)(8 * (n >> 3)));  /* Pin num respective to register. */
+	gpio->AFR[n >> 3] &= BIT_FIELD_CLEAR(x, 4);
+	gpio->AFR[n >> 3] |= BIT_FIELD_SET(x, 4, af);
+}
+
+void gpio_set_speed(uint16_t pin, uint8_t speed)
+{
+	GPIO_TypeDef *gpio = GPIO(PIN_BANK(pin));
+	uint8_t n = PIN_NUM(pin);
+	gpio->OSPEEDR &= BIT_FIELD_CLEAR(n, 2);
+	gpio->OSPEEDR &= BIT_FIELD_SET(n, 2, speed);
 }
 
 void rcc_port_set(uint8_t bank, uint8_t mode)
@@ -114,24 +124,52 @@ void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_ptr hand
 	line_funcs[n] = handler;
 }
 
-void uart_init(struct USART_TypeDef *uart, uint32_t baud)
+void uart_init(USART_TypeDef *uart, uint32_t baud)
 {
 	if (uart == USART1) RCC->APB2ENR |= BIT(14);
 	if (uart == USART2) RCC->APB1ENR |= BIT(17);
 	if (uart == USART3) RCC->APB1ENR |= BIT(18);
 	
 	uint16_t tx, rx;
-	if (uart == USART1) tx = PIN('B', 6), rx = PIN('B', 7);
-	if (uart == USART2) tx = PIN('D', 5), rx = PIN('D', 6);
+	if (uart == USART1) tx = PIN('A', 9), rx = PIN('A', 10);
+	if (uart == USART2) tx = PIN('A', 2), rx = PIN('A', 3);
 	if (uart == USART3) tx = PIN('D', 8), rx = PIN('D', 9);
 
 	gpio_set_mode(tx, GPIO_MODE_AF);
 	gpio_set_mode(rx, GPIO_MODE_AF);
-	gpio_set_af(tx, 0);
-	gpio_set_af(rx, 0);
+	uint8_t af = 1;
+	if (uart == USART3) af = 0;
+	gpio_set_af(tx, af);
+	gpio_set_af(rx, af);
+	
+	gpio_set_speed(tx, GPIO_SPEED_HIGH);
+	gpio_set_speed(rx, GPIO_SPEED_HIGH);
 
 	uart->CR1 = 0;  /* Disable this line. */
 	uart->BRR = FREQ / baud;
+	uart->CR1 |= BIT(0) | BIT(2) | BIT(3);  /* UART enable, receive enable, transmit enable. */
+}
+
+uint8_t uart_read_ready(USART_TypeDef *uart)
+{
+	return (uint8_t)(uart->ISR & BIT(5)) >> 5;  /* RXNE bit set = data is ready for read. */
+}
+
+uint8_t uart_read_byte(USART_TypeDef *uart)
+{
+	return (uint8_t)(uart->RDR & 255);
+}
+
+void uart_write_byte(USART_TypeDef *uart, uint8_t byte)
+{
+	uart->TDR = byte;
+	while ((uart->ISR & BIT(7)) == 0) _NOP;
+}
+
+void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len)
+{
+	/* while (len-- > 0) uart_write_byte(uart, *buf++); */
+	while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
 }
 
 void SysTick_Handler()
@@ -168,8 +206,8 @@ void EXTI4_15_IRQHandler()
 void SystemInit(void)
 {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
-	SysTick_Config(8000000 / 1000);
-	NVIC_SetPriority (SysTick_IRQn, 0);
+	SysTick_Config(FREQ / 1000);
+	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
 void _init() {;}

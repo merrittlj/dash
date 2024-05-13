@@ -8,10 +8,14 @@
 #ifndef HAL_H
 #define HAL_H
 #include <stdint.h>
+#include <stddef.h>
 
 #include "stm32f072xb.h"
 #include "common.h"
 
+
+/* TODO: find a better method to get the system clock... */
+#define FREQ 8000000
 
 /* GPIOA is 0x48000000, all subsequent banks are 0x400(1kb) apart. */
 #define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + (0x400U * (bank))))
@@ -32,6 +36,7 @@
 enum {GPIO_PULL_NONE, GPIO_PULL_UP, GPIO_PULL_DOWN};
 enum {GPIO_MODE_INPUT, GPIO_MODE_OUTPUT, GPIO_MODE_AF, GPIO_MODE_ANALOG};
 enum {GPIO_OUTPUT_CLEAR, GPIO_OUTPUT_SET};
+enum {GPIO_SPEED_LOW, GPIO_SPEED_MEDIUM, GPIO_SPEED_HIGH = 3};
 
 /* Enable/disable RCC. */
 enum {RCC_PORT_DISABLE, RCC_PORT_ENABLE};
@@ -41,6 +46,7 @@ extern void gpio_set_mode(uint16_t pin, uint8_t mode);
 extern void gpio_write(uint16_t pin, uint8_t mode);
 extern uint8_t gpio_read(uint16_t pin);
 extern void gpio_set_af(uint16_t pin, uint8_t af);
+extern void gpio_set_speed(uint16_t pin, uint8_t speed);
 
 /* Enable/disable the clock on a GPIO port. */
 extern void rcc_port_set(uint8_t bank, uint8_t mode);
@@ -57,7 +63,11 @@ extern void exti_pin_init(uint16_t pin, uint8_t rising, uint8_t priority, func_p
 
 
 /* TX/RX pads are connected to USART2. */
-extern void uart_init(struct USART_TypeDef *uart, uint32_t baud);
+extern void uart_init(USART_TypeDef *uart, uint32_t baud);
+extern uint8_t uart_read_ready(USART_TypeDef *uart);
+extern uint8_t uart_read_byte(USART_TypeDef *uart);
+extern void uart_write_byte(USART_TypeDef *uart, uint8_t byte);
+extern void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len);
 
 /* Functions referenced in CMSIS. */
 extern void SysTick_Handler();

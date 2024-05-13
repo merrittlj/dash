@@ -18,13 +18,14 @@
 #define LED_RED_PIN (PIN('B', 5))
 #define LED_GREEN_PIN (PIN('B', 4))
 #define LED_BLUE_PIN (PIN('B', 3))
-#define SHIFT_SER_PIN (PIN('A', 10))
-#define SHIFT_RCLK_PIN (PIN('A', 9))
+#define SHIFT_SER_PIN (PIN('C', 10))
+#define SHIFT_RCLK_PIN (PIN('A', 15))
 #define SHIFT_SRCLK_PIN (PIN('A', 8))
 #define DP1_PIN (PIN('B', 6))
 #define DP2_PIN (PIN('B', 7))
 #define DP3_PIN (PIN('B', 8))
 #define DP4_PIN (PIN('B', 9))
+#define STATUS_PIN (PIN('C', 11))
 
 /* States for the default FSM. */
 enum {STATE_MAX_SPEED, STATE_TRIP_DISTANCE, STATE_TOTAL_DISTANCE, NUM_DEFAULT_STATES};

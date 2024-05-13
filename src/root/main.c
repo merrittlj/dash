@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "stm32f072xb.h"
 
@@ -14,6 +15,7 @@
 #include "hal.h"
 #include "state.h"
 #include "seg.h"
+#include "syscalls.h"
 
 
 int main()
@@ -22,6 +24,7 @@ int main()
 	uint32_t idle_timer, idle_period = 10000;
 	uint8_t is_idle = 0;
 	uint32_t seg_timer, seg_period = 5;
+	uint32_t status_timer, status_period = 1000;
 
 	uint8_t button_pressed = 0;
 	gpio_set_mode(STATEBTN_PIN, GPIO_MODE_INPUT);
@@ -34,10 +37,15 @@ int main()
 	gpio_set_mode(DP2_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(DP3_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(DP4_PIN, GPIO_MODE_OUTPUT);
+
+	gpio_set_mode(STATUS_PIN, GPIO_MODE_OUTPUT);
+	gpio_write(STATUS_PIN, GPIO_OUTPUT_SET);
+	
+	uart_init(USART1, 9600);
 		
 	struct fsm machine;
 	fsm_init(&machine, DEFAULT_FSM, STATE_MAX_SPEED);
-
+	
 	for (;;) {
 		/* To prevent debounce, simply poll the button every 50ms or so. */
 		if (timer_expired(&debounce_timer, debounce_period, s_ticks)) {
@@ -65,6 +73,11 @@ int main()
 		}
 		if (timer_expired(&seg_timer, seg_period, s_ticks) && !is_idle) {
 			seg_display_next();
+		}
+		if (timer_expired(&status_timer, status_period, s_ticks)) {
+			uint8_t led_on = gpio_read(STATUS_PIN);
+			gpio_write(STATUS_PIN, led_on ^ 1);
+			printf("[heartbeat] LED = %d, tick = %lu\r\n", led_on, s_ticks);
 		}
 	}
 

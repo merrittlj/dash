@@ -90,4 +90,7 @@ debug:
 test:
 	@act --job act-linux
 
-.PHONY: all dep cmsis_core cmsis_f0 build clean dep_clean flash debug test
+serial:
+	@picocom -b 9600 -f n -y n -d 8 -p 1 -c /dev/ttyUSB0
+
+.PHONY: all dep cmsis_core cmsis_f0 build clean dep_clean flash debug test serial
