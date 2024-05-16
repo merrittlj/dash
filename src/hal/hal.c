@@ -168,7 +168,6 @@ void uart_write_byte(USART_TypeDef *uart, uint8_t byte)
 
 void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len)
 {
-	/* while (len-- > 0) uart_write_byte(uart, *buf++); */
 	while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
 }
 
@@ -205,6 +204,7 @@ void EXTI4_15_IRQHandler()
 
 void SystemInit(void)
 {
+	s_ticks = 0;
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
 	SysTick_Config(FREQ / 1000);
 	NVIC_SetPriority(SysTick_IRQn, 0);

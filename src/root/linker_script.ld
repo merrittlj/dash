@@ -18,34 +18,34 @@ SECTIONS
 
 	.text :
 	{
-		. = ALIGN(4);
+		. = ALIGN(8);
 	
 		*(.text)
 		*(.rodata)
 	
-		. = ALIGN(4);
+		. = ALIGN(8);
 	} >FLASH
 
 	.data :
 	{
-		. = ALIGN(4);
+		. = ALIGN(8);
 		_sdata = .;
 	
 		*(.data)
 
-		. = ALIGN(4);
+		. = ALIGN(8);
 		_edata = .;
 	} >SRAM AT> FLASH  /* SRAM is relocation address(where the section will be when the code is executed), FLASH is load address(where the section is loaded from to the target). */
 	_sidata = LOADADDR(.data);  /* Set to .data's load address(FLASH). */
 
 	.bss :
 	{
-		. = ALIGN(4);
+		. = ALIGN(8);
 		_sbss = .;
 	
 		*(.bss)
 	
-		. = ALIGN(4);
+		. = ALIGN(8);
 		_ebss = .;
 	} >SRAM
 	
