@@ -1,5 +1,7 @@
-* Seven segment display improvements
-	- No leading zeros
-	- ifndefs to optionally remove 4 digit support
-** Further modularize build/files
-*** Logging?
+* Raw sensor data UART logging
+* Magnet/sensor layout on board
+* Figure out speed tracking and determination
+* Saving/loading data
+* Schematic
+* Debug/prototype draft PCB
+* Finalized PCBs
