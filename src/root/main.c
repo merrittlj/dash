@@ -15,6 +15,7 @@
 #include "state.h"
 #include "seg.h"
 #include "tfp.h"
+#include "mag.h"
 
 int main()
 {
@@ -26,6 +27,7 @@ int main()
 
 	uint8_t button_pressed = 0;
 	gpio_set_mode(STATEBTN_PIN, GPIO_MODE_INPUT);
+	gpio_set_pull(STATEBTN_PIN, GPIO_PULL_UP);
 	
 	gpio_set_mode(SHIFT_SER_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_mode(SHIFT_RCLK_PIN, GPIO_MODE_OUTPUT);
@@ -38,9 +40,13 @@ int main()
 
 	gpio_set_mode(STATUS_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(STATUS_PIN, GPIO_OUTPUT_SET);
+
+	gpio_set_mode(HAL_SENSOR_PIN, GPIO_MODE_INPUT);
+	gpio_set_pull(HAL_SENSOR_PIN, GPIO_PULL_DOWN);
 	
 	uart_init(USART1, 9600);
-		
+	init_mag();
+
 	struct fsm machine;
 	fsm_init(&machine, DEFAULT_FSM, STATE_MAX_SPEED);
 	

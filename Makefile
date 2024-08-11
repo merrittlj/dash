@@ -8,6 +8,7 @@ TFP_DIR := $(INCLUDE_DIR)/tinyprintf
 ROOT_DIR    := $(SRC_DIR)/root
 HAL_DIR     := $(SRC_DIR)/hal
 PROG_DIR    := $(SRC_DIR)/prog
+MAG_DIR    := $(SRC_DIR)/mag
 STATE_DIR   := $(SRC_DIR)/state
 SEG_DIR    := $(SRC_DIR)/seg
 EMBMATH_DIR    := $(SRC_DIR)/embmath
@@ -21,6 +22,7 @@ INC_SRCH_PATH += -I$(TFP_DIR)
 INC_SRCH_PATH += -I$(ROOT_DIR)
 INC_SRCH_PATH += -I$(HAL_DIR)
 INC_SRCH_PATH += -I$(PROG_DIR)
+INC_SRCH_PATH += -I$(MAG_DIR)
 INC_SRCH_PATH += -I$(STATE_DIR)
 INC_SRCH_PATH += -I$(SEG_DIR)
 INC_SRCH_PATH += -I$(EMBMATH_DIR)
@@ -29,7 +31,7 @@ INC_SRCH_PATH += -I$(LOG_DIR)
 LIB_SRCH_PATH := 
 LIB_SRCH_PATH += -L$(MAKE_DIR)/libs
 
-LIBS := -lhal -lprog -lstate -lseg -lembmath -llog -lc -lgcc
+LIBS := -lhal -lprog -lmag -lstate -lseg -lembmath -llog -lc -lgcc
 
 # Toolchain
 CC  := arm-none-eabi-gcc
@@ -63,6 +65,7 @@ $(CMSIS_FX_DIR):
 build: dep
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk
+	@$(MAKE) -C $(MAG_DIR) -f mag.mk
 	@$(MAKE) -C $(STATE_DIR) -f state.mk
 	@$(MAKE) -C $(SEG_DIR) -f seg.mk
 	@$(MAKE) -C $(EMBMATH_DIR) -f embmath.mk
@@ -74,6 +77,7 @@ full_clean: clean dep_clean
 clean:
 	@$(MAKE) -C $(HAL_DIR) -f hal.mk clean
 	@$(MAKE) -C $(PROG_DIR) -f prog.mk clean
+	@$(MAKE) -C $(MAG_DIR) -f mag.mk clean
 	@$(MAKE) -C $(STATE_DIR) -f state.mk clean
 	@$(MAKE) -C $(SEG_DIR) -f seg.mk clean
 	@$(MAKE) -C $(LOG_DIR) -f log.mk clean

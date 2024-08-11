@@ -12,6 +12,7 @@
 #include "common.h"
 
 #include "hal.h"
+#include "mag.h"
 
 
 volatile uint32_t s_ticks = 0;
@@ -32,7 +33,6 @@ void gpio_set_mode(uint16_t pin, uint8_t mode)
 	uint8_t n = PIN_NUM(pin);
 
 	rcc_port_set(PIN_BANK(pin), RCC_PORT_ENABLE);
-	if (mode == GPIO_MODE_INPUT) gpio_set_pull(pin, GPIO_PULL_UP);
 
 	b->MODER &= BIT_FIELD_CLEAR(n, 2);
 	b->MODER |= BIT_FIELD_SET(n, 2, mode);
@@ -174,6 +174,7 @@ void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len)
 void SysTick_Handler()
 {
 	++s_ticks;
+	mag_interrupt();  /* TODO: remove this dependency somehow */
 }
 
 void EXTI_Common_IRQHandler()

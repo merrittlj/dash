@@ -19,7 +19,8 @@ extern void seg_send_bit(uint8_t bit);  /* Send a bit to the shift register. */
 extern void seg_clear_output();
 extern void seg_display_digit(uint8_t digit, uint8_t decimal_enabled);
 
-extern void seg_init(uint16_t num, uint8_t decimal);
+extern void seg_new_manual(uint16_t num, uint8_t decimal);
+extern void seg_new(double num);
 
 /* To display a multiple-digit number, we have to multiplex. Set a number to display and display each digit with a function. */
 extern void set_display_num(uint16_t num);

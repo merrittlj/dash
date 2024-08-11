@@ -14,6 +14,7 @@
 static uint16_t _display_num;
 static uint8_t _decimal_loc;
 static uint8_t _num_index;
+static uint8_t _subzero;
 
 static uint16_t _ser;
 static uint16_t _rclk;
@@ -67,10 +68,28 @@ void seg_display_digit(uint8_t digit, uint8_t decimal_enabled)
 	seg_update_output();
 }
 
-void seg_init(uint16_t num, uint8_t decimal)
+void seg_new_manual(uint16_t num, uint8_t decimal)
 {
 	set_display_num(num);
 	set_decimal_loc(decimal);
+	set_num_index(0);
+	_subzero = 0;
+}
+
+void seg_new(double num)
+{
+	uint8_t decimal_places = 0;
+	double div = num;
+	for (; div > 1; div /= 10, ++decimal_places) ;
+
+	_subzero = 0;
+	if (num < 1 && num >= 0.001) _subzero = 1;
+
+	uint16_t x = (uint16_t)(num * ipow(10, 4 - decimal_places));
+	if (!_subzero) set_display_num(x);
+	if (_subzero) set_display_num(x / 10);
+
+	set_decimal_loc(decimal_places % 4);
 	set_num_index(0);
 }
 
@@ -114,9 +133,11 @@ void seg_display_next()
 	seg_clear_output();
 	if (_num_index > 0) gpio_write(_displays[_num_index - 1], GPIO_OUTPUT_CLEAR);
 	if (_num_index == 0) gpio_write(_displays[3], GPIO_OUTPUT_CLEAR);
-	if (!(current_digit() == 0 && (uint16_t)(ipow(10, 4 - _num_index)) > _display_num)) {
+	/* This block displays the digit, skip to not display this digit */
+	uint8_t skip = (current_digit() == 0 && (uint16_t)(ipow(10, 4 - _num_index)) > _display_num) && ((_display_num != 0) || (_num_index != 3)) && !_subzero;  /* Hide leading 0's */
+	if (!skip) {
 		gpio_write(_displays[_num_index], GPIO_OUTPUT_SET);
-		uint8_t decimal_enabled = (_num_index == (_decimal_loc - 1)) && _decimal_loc <= 4;
+		uint8_t decimal_enabled = ((_num_index == (_decimal_loc - 1)) && _decimal_loc <= 4) || (_subzero && _num_index == 0);
 		seg_display_digit(current_digit(), decimal_enabled);
 	}
 
