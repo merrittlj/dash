@@ -30,10 +30,11 @@ void mag_interrupt()
 	uint8_t magnet = gpio_read(HAL_SENSOR_PIN);
 
 	if (!magnet) ++since_pulse;
-	else if (magnet && !prev_mag_present && since_pulse != 0)
+	else if (magnet && !prev_mag_present && since_pulse > 10)
 	{
 		++trip_pulses;
-		double current_speed = ((WHEEL_CIRC / WHEEL_MAGNETS) / ((double)since_pulse / 1000)) / 44.704;
+		/* Circumference between two magnets, divided by seconds since last magnet, converted from cm/s to mph */
+		double current_speed = (MAG_CIRC / ((double)since_pulse / 1000)) / 44.704;
 		if (current_speed > max_speed) max_speed = current_speed;
 		since_pulse = 0;
 	}
@@ -48,8 +49,8 @@ double get_max_speed()
 
 double get_trip_distance()
 {
-	/* Find revolutions of wheel, multiply by wheel circ. */
-	return ((trip_pulses / WHEEL_MAGNETS) * WHEEL_CIRC);  /* TODO: this doesn't work.. */
+	/* Circumference divided by magnet count, times the amount of magnets we've passed for cm distance, convert to miles */
+	return (MAG_CIRC * trip_pulses) / 160934.4;
 }
 
 static double read_saved_distance()

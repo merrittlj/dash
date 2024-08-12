@@ -2,12 +2,15 @@
 #define MAG_H
 
 #include <stdint.h>
+#include <math.h>
 
 
 /* # in the holder */
 #define WHEEL_MAGNETS 8
-/* circ in cm */
-#define WHEEL_CIRC 80
+/* diameter in cm */
+#define WHEEL_DIAMETER 60
+#define WHEEL_CIRC (WHEEL_DIAMETER * M_PI)
+#define MAG_CIRC (WHEEL_CIRC / WHEEL_MAGNETS)
 
 extern void init_mag();
 extern void mag_interrupt();  /* Called every 1ms by SysTick */

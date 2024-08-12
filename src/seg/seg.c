@@ -84,6 +84,7 @@ void seg_new(double num)
 
 	_subzero = 0;
 	if (num < 1 && num >= 0.001) _subzero = 1;
+	if (num < 0.001) num = 0;
 
 	uint16_t x = (uint16_t)(num * ipow(10, 4 - decimal_places));
 	if (!_subzero) set_display_num(x);
