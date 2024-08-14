@@ -1,14 +1,13 @@
 #ifndef MAG_H
 #define MAG_H
 
-#include <stdint.h>
 #include <math.h>
 
 
 /* # in the holder */
 #define WHEEL_MAGNETS 8
-/* diameter in cm */
-#define WHEEL_DIAMETER 60
+/* diameter in cm(maybe convert this to mm eventually?) */
+#define WHEEL_DIAMETER 9
 #define WHEEL_CIRC (WHEEL_DIAMETER * M_PI)
 #define MAG_CIRC (WHEEL_CIRC / WHEEL_MAGNETS)
 
