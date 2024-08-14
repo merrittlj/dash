@@ -34,7 +34,7 @@ void mag_interrupt()
 	{
 		++trip_pulses;
 		/* Circumference between two magnets, divided by seconds since last magnet, converted from cm/s to mph */
-		double current_speed = (MAG_CIRC / ((double)since_pulse / 1000)) / 44.704;
+		double current_speed = (MAG_CIRC / ((double)since_pulse / 1000 / MS_MUL)) / 44.704;
 		if (current_speed > max_speed) max_speed = current_speed;
 		since_pulse = 0;
 	}

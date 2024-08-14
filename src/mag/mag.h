@@ -12,7 +12,7 @@
 #define MAG_CIRC (WHEEL_CIRC / WHEEL_MAGNETS)
 
 extern void init_mag();
-extern void mag_interrupt();  /* Called every 1ms by SysTick */
+extern void mag_interrupt();  /* Called 5/ms(0.2ms) by SysTick */
 /* Both return xxxx instead of xx.xx */
 extern double get_max_speed();
 extern double get_trip_distance();

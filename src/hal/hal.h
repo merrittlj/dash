@@ -16,6 +16,8 @@
 
 /* TODO: find a better method to get the system clock... */
 #define FREQ 8000000
+#define MS_MUL 5  /* The amount of times per millisecond we want SysTick to run(ex: 2 = SysTick runs every 0.5 ms). */
+#define s_ticks_ms (s_ticks / MS_MUL)
 
 /* GPIOA is 0x48000000, all subsequent banks are 0x400(1kb) apart. */
 #define GPIO(bank) ((GPIO_TypeDef *) (GPIOA_BASE + (0x400U * (bank))))

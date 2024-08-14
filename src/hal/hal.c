@@ -174,7 +174,7 @@ void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len)
 void SysTick_Handler()
 {
 	++s_ticks;
-	mag_interrupt();  /* TODO: remove this dependency somehow */
+	//mag_interrupt();  /* TODO: remove this dependency somehow */
 }
 
 void EXTI_Common_IRQHandler()
@@ -207,7 +207,7 @@ void SystemInit(void)
 {
 	s_ticks = 0;
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
-	SysTick_Config(FREQ / 1000);
+	SysTick_Config(FREQ / (1000 * MS_MUL));
 	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 

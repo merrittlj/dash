@@ -53,23 +53,23 @@ int main()
 	tfp_printf("\r\n\r\n[prog] ready to run!\r\n");
 	for (;;) {
 		/* To prevent debounce, simply poll the button every 50ms or so. */
-		if (timer_expired(&debounce_timer, debounce_period, s_ticks)) {
+		if (timer_expired(&debounce_timer, debounce_period, s_ticks_ms)) {
 			if (!gpio_read(STATEBTN_PIN) && !button_pressed) {  /* Button input is pull-up. */
 				button_pressed = 1;
 				/* Capture first button press and re-do the action. */
 				if (is_idle) {
 					is_idle = 0;
-					enable_timer(&idle_timer, &idle_period, 10000, s_ticks);
+					enable_timer(&idle_timer, &idle_period, 10000, s_ticks_ms);
 					fsm_action(&machine);
 					tfp_printf("[idle] disabling idle mode\r\n");
 					continue;
 				}
 
-				idle_timer = s_ticks + idle_period;
+				idle_timer = s_ticks_ms + idle_period;
 				fsm_next(&machine);
 			} else if (gpio_read(STATEBTN_PIN)) button_pressed = 0;
 		}
-		if (timer_expired(&idle_timer, idle_period, s_ticks) && !is_idle) {
+		if (timer_expired(&idle_timer, idle_period, s_ticks_ms) && !is_idle) {
 			is_idle = 1;
 			gpio_write(LED_RED_PIN, GPIO_OUTPUT_CLEAR);
 			gpio_write(LED_GREEN_PIN, GPIO_OUTPUT_CLEAR);
@@ -78,14 +78,14 @@ int main()
 			disable_timer(&idle_period);
 			tfp_printf("[idle] enabling idle mode\r\n");
 		}
-		if (timer_expired(&seg_timer, seg_period, s_ticks) && !is_idle) {
+		if (timer_expired(&seg_timer, seg_period, s_ticks_ms) && !is_idle) {
 			seg_display_next();
 		}
-		if (timer_expired(&status_timer, status_period, s_ticks)) {
+		if (timer_expired(&status_timer, status_period, s_ticks_ms)) {
 			uint8_t led_on = gpio_read(STATUS_PIN);
 			
 			gpio_write(STATUS_PIN, led_on ^ 1);
-			tfp_printf("[heartbeat] LED = %d, tick = %lu\r\n", led_on, s_ticks);
+			tfp_printf("[heartbeat] LED = %d, tick = %lu\r\n", led_on, (unsigned long)s_ticks_ms);
 		}
 	}
 
