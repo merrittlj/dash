@@ -27,7 +27,7 @@ void init_mag()
 
 void mag_interrupt()
 {
-	uint8_t magnet = gpio_read(HAL_SENSOR_PIN);
+	uint8_t magnet = gpio_read(HALL_SENSOR_PIN);
 
 	if (!magnet) ++since_pulse;
 	else if (magnet && !prev_mag_present && since_pulse > 10)

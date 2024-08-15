@@ -7,7 +7,6 @@
 
 #ifndef PROG_H
 #define PROG_H
-#include <stdint.h>
 
 #include "hal.h"
 #include "state.h"
@@ -26,7 +25,7 @@
 #define DP3_PIN (PIN('B', 8))
 #define DP4_PIN (PIN('B', 9))
 #define STATUS_PIN (PIN('C', 11))
-#define HAL_SENSOR_PIN (PIN('C', 12))
+#define HALL_SENSOR_PIN (PIN('B', 2))
 
 /* States for the default FSM. */
 enum {STATE_MAX_SPEED, STATE_TRIP_DISTANCE, STATE_TOTAL_DISTANCE, NUM_DEFAULT_STATES};

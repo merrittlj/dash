@@ -41,8 +41,8 @@ int main()
 	gpio_set_mode(STATUS_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(STATUS_PIN, GPIO_OUTPUT_SET);
 
-	gpio_set_mode(HAL_SENSOR_PIN, GPIO_MODE_INPUT);
-	gpio_set_pull(HAL_SENSOR_PIN, GPIO_PULL_DOWN);
+	gpio_set_mode(HALL_SENSOR_PIN, GPIO_MODE_INPUT);
+	gpio_set_pull(HALL_SENSOR_PIN, GPIO_PULL_DOWN);
 	
 	uart_init(USART1, 9600);
 	init_mag();
