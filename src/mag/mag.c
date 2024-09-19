@@ -34,12 +34,21 @@ void mag_interrupt()
 	{
 		++trip_pulses;
 		/* Circumference between two magnets, divided by seconds since last magnet, converted from cm/s to mph */
-		double current_speed = (MAG_CIRC / ((double)since_pulse / 1000 / MS_MUL)) / 44.704;
+		/* double current_speed = (MAG_CIRC / ((double)since_pulse / 1000 / MS_MUL)) / 44.704; */
+		int ms = (since_pulse / MS_MUL);
+		double mm_ms = (MAG_CIRC / ms);
+		/* Convert from mm/ms to mm/s and then mm/s to mph */
+		double current_speed = (mm_ms * 1000) / 447.04;
 		if (current_speed > max_speed) max_speed = current_speed;
 		since_pulse = 0;
 	}
 
 	prev_mag_present = magnet;
+}
+
+double get_trip_pulses()
+{
+	return trip_pulses;
 }
 
 double get_max_speed()
@@ -49,8 +58,8 @@ double get_max_speed()
 
 double get_trip_distance()
 {
-	/* Circumference divided by magnet count, times the amount of magnets we've passed for cm distance, convert to miles */
-	return (MAG_CIRC * trip_pulses) / 160934.4;
+	/* Circumference divided by magnet count, times the amount of magnets we've passed for mm distance, convert to miles */
+	return (MAG_CIRC * trip_pulses) / 1609344;
 }
 
 static double read_saved_distance()

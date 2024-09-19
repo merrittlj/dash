@@ -174,7 +174,7 @@ void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len)
 void SysTick_Handler()
 {
 	++s_ticks;
-	mag_interrupt();  /* TODO: remove this dependency somehow */
+	mag_interrupt();
 }
 
 void EXTI_Common_IRQHandler()

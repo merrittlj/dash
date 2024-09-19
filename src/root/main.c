@@ -84,7 +84,7 @@ int main()
 		if (timer_expired(&status_timer, status_period, s_ticks_ms)) {
 			uint8_t led_on = gpio_read(STATUS_PIN);
 			
-			gpio_write(STATUS_PIN, led_on ^ 1);
+			/* gpio_write(STATUS_PIN, led_on ^ 1); */
 			tfp_printf("[heartbeat] LED = %d, tick = %lu\r\n", led_on, (unsigned long)s_ticks_ms);
 		}
 	}

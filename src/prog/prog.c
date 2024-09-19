@@ -67,7 +67,7 @@ void total_distance_action()
 	gpio_set_mode(LED_BLUE_PIN, GPIO_MODE_OUTPUT);
 	gpio_write(LED_BLUE_PIN, GPIO_OUTPUT_SET);
 
-	seg_new(get_total_distance());
+	seg_new(get_max_speed());
 	seg_display_next();
 }
 
